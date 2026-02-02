@@ -52,12 +52,12 @@ Join our community of developers creating universal apps.
 
 ## Prerequisites
 - Node.js and npm installed
-- Android Studio with emulator configured
+- Android Studio with custom emulator configured
 - Firebase project created
 
 ## Notes
 1. Install just Android SDK version 15 as listed in instructions on expo documentation (referenced in Step 4).
-2. When looking for emulators, just use the "Medium Tablet" that shows up.
+2. When looking for emulators, you will need to make a custom device to make it match the proper dimensions of the Lenovo Tab M10 Plus that we will be using. To do this, on Step 3 of "Setup an Emulator" from the link below, click "New Hardware Profile" at the bottom of the window. The only setup information that needs to be changed is the Size: 10.61" and Resolution: 2000 × 1200 to these settings. Ensure the API is called "Android 15.0 "VanillaIceCream" | arm64" and leave the default settings.
 
 ## Setup
 
@@ -68,6 +68,6 @@ Join our community of developers creating universal apps.
 4. Install dependencies: `npm install`
 5. Install Android emulators from Android studio from https://docs.expo.dev/workflow/android-studio-emulator/
 Follow from steps "Install Watchman and JDK" down to "Set up an Emulator" (with support for both Mac and PC)
-6. Press play in the emulators screen on Android Studio
+6. Press play in the emulators screen on Android Studio (for the custom one you've made. More information in Step 2 of the Notes section of this README.)
 5. `npx expo start` and open android simulator by clicking 'a'
 7. Start the Android emulator from Android Studio with run the app: `npm run android`
