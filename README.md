@@ -2,6 +2,22 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+Switch between the Tablet Experience and Mobile Guide
+Tablet Experience is in the PolishTabletExperience folder
+
+   ```bash
+   cd PolishTabletExperience
+   ```
+
+Mobile Guide is in the PolishGuideMobile folder
+
+   ```bash
+   cd PolishGuideMobile
+   ```
+
+Follow the "Get started" steps in both folders.
+
+
 ## Get started
 
 1. Install dependencies
@@ -64,10 +80,13 @@ Join our community of developers creating universal apps.
 1. Clone this repository
 2. Install Expo CLI. If you haven’t installed Expo globally yet, run the following command:
 `npm install -g expo-cli`
-3. Change directories with `cd MuskegonPolishFestival`
+3. Change directories with `cd PolishTabletExperience`
 4. Install dependencies: `npm install`
 5. Install Android emulators from Android studio from https://docs.expo.dev/workflow/android-studio-emulator/
 Follow from steps "Install Watchman and JDK" down to "Set up an Emulator" (with support for both Mac and PC)
 6. Press play in the emulators screen on Android Studio (for the custom one you've made. More information in Step 2 of the Notes section of this README.)
-5. `npx expo start` and open android simulator by clicking 'a'
-7. Start the Android emulator from Android Studio with run the app: `npm run android`
+7. `npx expo start` and open android simulator by clicking 'a'
+8. Start the Android emulator from Android Studio with run the app: `npm run android`
+9. For mobile experience change directories with `cd ..` and `cd PolishGuideMobile`
+10. Install dependencies: `npm install`
+11. `npx expo start` and open ios simulator with 'i'
