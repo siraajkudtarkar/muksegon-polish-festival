@@ -1,7 +1,7 @@
 // components/ContentCard.tsx
 
-import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { ContentCardItem } from "../constants/contentData";
+import { Text, View, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { ContentCardItem, POI_DETAILS } from "../constants/contentData";
 import { ThemedText } from "@/components/themed-text";
 import { MainColors } from "@/constants/theme";
 
@@ -13,6 +13,7 @@ type Props = {
 export default function ContentCard({ item, onPress }: Props) {
   const imageSource =
     typeof item.imageUri === "string" ? { uri: item.imageUri } : item.imageUri;
+  const isVideo = !!POI_DETAILS[item.id]?.mainVideo;
 
   return (
     <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={onPress}>
@@ -22,6 +23,13 @@ export default function ContentCard({ item, onPress }: Props) {
           source={imageSource}
           style={styles.image}
         />
+        {isVideo ? (
+          <View style={styles.cardPlayOverlay} pointerEvents="none">
+            <View style={styles.cardPlayCircle}>
+              <Text style={styles.cardPlayText}>▶</Text>
+            </View>
+          </View>
+        ) : null}
       </View>
 
       {/* Text area */}
@@ -58,12 +66,33 @@ const styles = StyleSheet.create({
   imageWrapper: {
     padding: 10,
     paddingBottom: 0,
+    position: "relative",
   },
 
   image: {
     width: "100%",
     height: 180,
     borderRadius: 18,
+  },
+  cardPlayOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.12)",
+  },
+  cardPlayCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardPlayText: {
+    color: "#fff",
+    fontSize: 26,
+    fontWeight: "700",
+    marginLeft: 3,
   },
 
   textArea: {
