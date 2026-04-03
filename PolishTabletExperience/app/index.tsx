@@ -99,36 +99,64 @@
 
 import TimelineScreen from '@/components/screens/timeline-screen';
 import ContentScreen from '@/screens/ContentScreen';
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useLocalSearchParams } from 'expo-router';
+import { Animated, StyleSheet, View } from 'react-native';
 import { EraKey } from '@/constants/contentData';
 
 type HomeView = 'timeline' | 'content';
 
+const FADE_DURATION = 200;
+
 export default function IndexScreen() {
 	const [view, setView] = useState<HomeView>('timeline');
 	const [contentEra, setContentEra] = useState<EraKey>('all');
-	const [timelineYear, setTimelineYear] = useState<number | undefined>(1918);
 	const { year } = useLocalSearchParams<{ year?: string }>();
+
+	// Both screens are always mounted; opacity controls which is visible
+	const timelineOpacity = useRef(new Animated.Value(1)).current;
+	const contentOpacity = useRef(new Animated.Value(0)).current;
 
 	const selectedYear = year ? Number(year) : undefined;
 
-	if (view === 'content') {
-		return (<ContentScreen initialEra={contentEra}
-			onPressTimeline={(year) => {
-			setTimelineYear(year);
-			setView('timeline');
-		}}  />);
-	}
+	const switchView = useCallback(
+		(newView: HomeView, era?: EraKey) => {
+			if (era !== undefined) setContentEra(era);
+
+			const [fadeIn, fadeOut] =
+				newView === 'content'
+					? [contentOpacity, timelineOpacity]
+					: [timelineOpacity, contentOpacity];
+
+			// True crossfade: fade out old and fade in new simultaneously
+			Animated.parallel([
+				Animated.timing(fadeOut, { toValue: 0, duration: FADE_DURATION, useNativeDriver: true }),
+				Animated.timing(fadeIn, { toValue: 1, duration: FADE_DURATION, useNativeDriver: true }),
+			]).start(() => setView(newView));
+		},
+		[timelineOpacity, contentOpacity],
+	);
 
 	return (
-		<TimelineScreen
-		  initialYear={selectedYear}
-		  onPressContent={(era) => {
-			setContentEra(era);
-			setView('content');
-		}}
-		/>
-	  );
-
+		<View style={{ flex: 1 }}>
+			<Animated.View
+				style={[StyleSheet.absoluteFill, { opacity: timelineOpacity }]}
+				pointerEvents={view === 'timeline' ? 'auto' : 'none'}
+			>
+				<TimelineScreen
+					initialYear={selectedYear}
+					onPressContent={(era) => switchView('content', era)}
+				/>
+			</Animated.View>
+			<Animated.View
+				style={[StyleSheet.absoluteFill, { opacity: contentOpacity }]}
+				pointerEvents={view === 'content' ? 'auto' : 'none'}
+			>
+				<ContentScreen
+					initialEra={contentEra}
+					onPressTimeline={() => switchView('timeline')}
+				/>
+			</Animated.View>
+		</View>
+	);
 }
