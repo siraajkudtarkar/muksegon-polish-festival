@@ -13,7 +13,7 @@ type Props = {
 export default function ContentCard({ item, onPress }: Props) {
   const imageSource =
     typeof item.imageUri === "string" ? { uri: item.imageUri } : item.imageUri;
-  const isVideo = !!POI_DETAILS[item.id]?.mainVideo;
+  const isVideo = !!POI_DETAILS[item.id]?.youtubeId;
 
   return (
     <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={onPress}>

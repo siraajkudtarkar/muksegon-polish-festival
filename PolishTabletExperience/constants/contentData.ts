@@ -36,8 +36,8 @@ export type PoiDetail = {
     summary?: string;
     // Local image for the large hero on the left. Optional: some POIs may not have a dedicated asset yet.
     mainImage?: any;
-    // Optional video for the main hero on the left (played from the "expanded" POI detail).
-    mainVideo?: any;
+    // YouTube video ID to embed as the main hero (replaces local mainVideo).
+    youtubeId?: string;
     // IDs of other cards to show in "Related Content"
     relatedIds: string[];
 };
@@ -52,7 +52,7 @@ export const POI_DETAILS: Record<string, PoiDetail> = {
             "Poland was a Catholic nation but provided legal protection to religious minorities. Protestants, Jews, Muslims, and Orthodox Christians had the freedom to practice their faiths.",
         summary: "Poland protected religious freedom early",
         mainImage: require("../assets/video/video_thumbnail.png"),
-        mainVideo: require("../assets/video/video1.mp4"),
+        youtubeId: "uh72gMH2vik",
         relatedIds: ["c2", "c3"],
     },
     c2: {
