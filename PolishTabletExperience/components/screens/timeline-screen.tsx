@@ -6,12 +6,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TimelineItem, TimelineScrubber } from '@/components/timeline-scrubber';
 import { FontFamily, MainColors } from '@/constants/theme';
-import { EraKey } from '@/constants/contentData';
+import { EraKey, POI_DETAILS } from '@/constants/contentData';
+import { HOTSPOT_POSITIONS } from '@/constants/hotspotPositions';
 
 const HOME_ICON = require('@/assets/General_Icons/ Home_icon.svg');
 
 import MapHotspot from '@/components/MapHotspot';
 import PoiButton from '../PoiButton';
+
 
 type EraDefinition = {
   name: string;
@@ -19,10 +21,12 @@ type EraDefinition = {
   timeframe: string;
   years: number[];
   color: string;
+  borderExplanation?: string;
 };
 
 type TimelineScreenProps = {
   onPressContent?: (era: EraKey) => void;
+  onTimelineYearChange?: (year: number) => void;
   initialYear?: number;
 };
 
@@ -30,50 +34,85 @@ const ERA_DEFINITIONS: EraDefinition[] = [
   {
     name: 'The Golden Age',
     summary: 'A time of political strength, cultural flourishing, and territorial expansion.',
-    timeframe: 'Late 15th Century to Mid-17th Century',
+    timeframe: 'Late 15th — Mid-17th Century',
     years: [1635, 1653],
-    color: '#907618',
+    color: '#6E5A12',
   },
   {
-    name: 'The Era of Wars & Partitions',
+    name: 'The Silver Age & Era of Wars',
     summary: 'Marked by wars, weakening government, and foreign interference.',
-    timeframe: 'Late 17th Century to 19th Century',
-    years: [1686, 1699, 1721, 1742, 1772, 1792, 1793, 1795],
-    color: '#588240',
+    timeframe: 'Late 17th — 19th Century',
+    years: [1686, 1699, 1701, 1713, 1721, 1742],
+    color: '#3E642B',
+  },
+  {
+    name: 'Silver Age & Era of Wars: First Partition',
+    summary: 'Marked by wars, weakening government, and foreign interference.',
+    timeframe: 'Late 17th — 19th Century',
+    years: [1772, 1792],
+    color: '#3E642B',
+  },
+    {
+    name: 'Silver Age & Era of Wars: Second Partition',
+    summary: 'Marked by wars, weakening government, and foreign interference.',
+    timeframe: 'Late 17th — 19th Century',
+    years: [1793],
+    color: '#3E642B',
+  },
+  {
+    name: 'Silver Age & Era of Wars: Third Partition',
+    summary: 'Marked by wars, weakening government, and foreign interference.',
+    timeframe: 'Late 17th — 19th Century',
+    years: [1795],
+    color: '#3E642B',
   },
   {
     name: 'Struggle for Independence',
     summary: 'A century of failed uprisings and growing nationalism.',
-    timeframe: '19th Century to WW1',
-    years: [1804, 1807, 1815, 1831, 1846, 1848, 1862, 1867, 1871, 1878],
-    color: '#806FB8',
+    timeframe: '19th Century — WW1',
+    years: [1804, 1807, 1815, 1831, 1846, 1848, 1862, 1867, 1871, 1878, 1884, 1894, 1904],
+    color: '#5E4E95',
   },
   {
     name: 'Rebirth of Poland',
     summary: 'Poland regained its independence and rebuilt itself as a sovereign state.',
-    timeframe: '',
-    years: [1914, 1917, 1918, 1919, 1920, 1922, 1938],
-    color: '#917459',
+    timeframe: '1914 — 1939',
+    years: [1914, 1917, 1918, 1919, 1920, 1921, 1924, 1933, 1938],
+    color: '#6F563E',
   },
   {
     name: 'World War II & Occupation',
     summary: 'Poland was invaded and divided between Nazi Germany and the Soviet Union.',
-    timeframe: '1939 to 1945',
-    years: [1939, 1940, 1944, 1945],
-    color: '#537F9D',
+    timeframe: '1939 — 1945',
+    years: [1939, 1940, 1942, 1944],
+    color: '#3B6583',
+  },
+  {
+    name: 'Liberation & Reorganization',
+    summary: 'N/A',
+    timeframe: '1945 — 1948',
+    years: [1945],
+    color: '#3F6E8E',
   },
   {
     name: 'Communist Poland',
     summary: 'Communist Poland under Soviet influence.',
-    timeframe: '1945 to 1989',
-    years: [1948, 1951, 1960, 1970, 1975, 1980, 1987],
-    color: '#A06B6A',
+    timeframe: '1948 — 1980',
+    years: [1948, 1951, 1960, 1970],
+    color: '#8B5E4A',
+  },
+    {
+    name: 'Growing Discontent',
+    summary: 'N/A',
+    timeframe: '1980 — 1989',
+    years: [1980, 1985],
+    color: '#6F5A8F',
   },
   {
     name: 'Modern Poland',
     summary: 'Where we are today: a democratic republic and member of the EU and NATO.',
-    timeframe: '1990 to Present',
-    years: [1991, 1993, 2003, 2009],
+    timeframe: '1989 — Present',
+    years: [1989, 1993, 2002, 2009],
     color: '#0F766E',
   },
 ];
@@ -98,6 +137,7 @@ const DEFAULT_INDEX = Math.max(
 
 const MAP_1635 = require('@/assets/maps_svg/1635-Realsize.svg');
 const MAP_1699 = require('@/assets/maps_svg/1699,1701,1713.svg');
+const MAP_1721 = require('@/assets/maps_svg/1721.svg');
 const MAP_1772 = require('@/assets/maps_svg/1772.svg');
 const MAP_1793 = require('@/assets/maps_svg/1793.svg');
 const MAP_1795 = require('@/assets/maps_svg/1795.svg');
@@ -107,6 +147,7 @@ const MAP_1831 = require('@/assets/maps_svg/1831.svg');
 const MAP_1846 = require('@/assets/maps_svg/1846.svg');
 const MAP_1848 = require('@/assets/maps_svg/1848.svg');
 const MAP_1867 = require('@/assets/maps_svg/1867.svg');
+const MAP_1871 = require('@/assets/maps_svg/1871.svg');
 const MAP_1878 = require('@/assets/maps_svg/1878, 1884,1894,1904.svg');
 const MAP_1917 = require('@/assets/maps_svg/1917.svg');
 const MAP_1918 = require('@/assets/maps_svg/1918 - 5.svg');
@@ -119,18 +160,25 @@ const MAP_1940 = require('@/assets/maps_svg/1940.1942.svg');
 const MAP_1944 = require('@/assets/maps_svg/1944.svg');
 const MAP_1945 = require('@/assets/maps_svg/1945 - 5.svg');
 const MAP_1948 = require('@/assets/maps_svg/1948, 1951, 1960, 1970, 1975, 1980, 1987.svg');
-const MAP_1991 = require('@/assets/maps_svg/1991.svg');
+const MAP_1989 = require('@/assets/maps_svg/1989.svg');
 const MAP_1993 = require('@/assets/maps_svg/1993, 2002, 2011.svg');
 
 const RIGHT_ALIGNED_MAP_POSITION = { right: 0, top: '32%' };
 const LEFT_BACKGROUND_VECTOR = require('@/assets/maps_svg/background-vector.svg');
 
 const CULTURE_ICON = require('@/assets/POI_Icon/POI_Culture.svg');
-const HOTSPOT_IMAGE = require('@/assets/content_images/CommunistPoland/CommunistPoland_1.png');
+// const HOTSPOT_IMAGE = require('@/assets/content_images/CommunistPoland/CommunistPoland_1.png');
+const HOTSPOT_ICONS = {
+  culture: require('@/assets/POI_Icon/POI_Culture.svg'),
+  biography: require('@/assets/POI_Icon/POI_Biography.svg'),
+  history: require('@/assets/POI_Icon/POI_History.svg'),
+  science: require('@/assets/POI_Icon/POI_Science.svg'),
+};
 
 const MAP_BY_FLOOR_YEAR: Array<{ startYear: number; source: number }> = [
   { startYear: 1635, source: MAP_1635 },
   { startYear: 1686, source: MAP_1699 },
+  { startYear: 1721, source: MAP_1721 },
   { startYear: 1772, source: MAP_1772 },
   { startYear: 1793, source: MAP_1793 },
   { startYear: 1795, source: MAP_1795 },
@@ -140,6 +188,7 @@ const MAP_BY_FLOOR_YEAR: Array<{ startYear: number; source: number }> = [
   { startYear: 1846, source: MAP_1846 },
   { startYear: 1848, source: MAP_1848 },
   { startYear: 1867, source: MAP_1867 },
+  { startYear: 1871, source: MAP_1871 },
   { startYear: 1878, source: MAP_1878 },
   { startYear: 1917, source: MAP_1917 },
   { startYear: 1918, source: MAP_1918 },
@@ -152,9 +201,47 @@ const MAP_BY_FLOOR_YEAR: Array<{ startYear: number; source: number }> = [
   { startYear: 1944, source: MAP_1944 },
   { startYear: 1945, source: MAP_1945 },
   { startYear: 1948, source: MAP_1948 },
-  { startYear: 1991, source: MAP_1991 },
+  { startYear: 1989, source: MAP_1989 },
   { startYear: 1993, source: MAP_1993 },
 ];
+
+const BORDER_CHANGE_BY_YEAR: Record<number, string> = {
+  1635: 'Sweden signed the Treaty of Stuhmsdorf, returning territories to the Polish–Lithuanian Commonwealth.',
+  1653: 'Internal conflicts and wars begin, marking the decline of Poland’s strength.',
+  1686: 'Eternal Peace Treaty confirmed Russias control over Left-bank Ukraine.',
+  1699: 'Treaty of Karlowitz returned remaining Podolia to Poland.',
+  1721: 'Poland loses more control as its neighbors gain power.',
+  1742: 'Poland’s economy and military decline further.',
+  1772: 'First Partition divided 30% of Poland among Russia, Prussia, and Austria.',
+  1792: 'Poland fights Russia to protect its new constitution but loses.',
+  1793: 'Second Partition saw more land lost to Russia and Prussia.',
+  1795: 'Third Partition erased Poland from the map.',
+  1804: 'Napoleon’s rise gives Poles hope for independence.',
+  1807: 'Duchy of Warsaw created by Napoleon from former Polish lands.',
+  1815: 'Congress of Vienna split Duchy of Warsaw between Prussia and Russia.',
+  1831: 'Congress Poland lost autonomy after the November Uprising.',
+  1846: 'Free City of Cracow annexed by Austria.',
+  1848: 'Eternal Peace Treaty confirmed Russia\'s control over Left-bank Ukraine.',
+  1862: 'Eternal Peace Treaty confirmed Russia\'s control over Left-bank Ukraine.',
+  1867: 'Austria grants some autonomy to the Polish region of Galicia.',
+  1871: 'Germany is united, increasing pressure on Polish culture.',
+  1878: 'Polish nationalism and independence movements grow.',
+  1914: 'WWI begins – Poland’s land is controlled by Germany, Russia, and Austro-Hungary.',
+  1917: 'The Russian Revolution brings hope for Polish independence.',
+  1918: 'Poland declared independence and began reclaiming territory.',
+  1919: 'Treaty of Versailles recreated Poland with lands from Germany.',
+  1920: 'Poland gained Danzig access and seized East Galicia from ZUNR.',
+  1922: 'Central Lithuania joined Poland finalizing eastern borders.',
+  1938: 'Poland annexed Trans-Olza and parts of Slovak Czechoslovakia.',
+  1939: 'Germany and USSR partitioned Poland in WWII.',
+  1940: 'Poland is divided between Nazi Germany and the Soviet Union.',
+  1944: 'Warsaw Uprising – A major rebellion against German rule fails.',
+  1945: 'Post-WWII borders shifted west; eastern lands annexed by USSR.',
+  1948: 'Minor border adjustment near Przemyśl with USSR.',
+  1991: 'Communism ends – Poland becomes a democracy.',
+  1993: 'The last Soviet troops leave Poland.',
+};
+
 
 function getEraBackgroundMap(year: number) {
   for (let index = MAP_BY_FLOOR_YEAR.length - 1; index >= 0; index -= 1) {
@@ -192,8 +279,10 @@ function getIndexFromYear(year: number) {
   return foundIndex >= 0 ? foundIndex : DEFAULT_INDEX;
 }
 
+
 export default function TimelineScreen({
   onPressContent,
+  onTimelineYearChange,
   initialYear,
 }: TimelineScreenProps) {
   const router = useRouter();
@@ -209,6 +298,9 @@ export default function TimelineScreen({
 
 
     const [selectedIndex, setSelectedIndex] = useState(initialIndex);
+    const currentItem = ERA_ITEMS[selectedIndex] ?? ERA_ITEMS[0];
+    const borderDescription =
+      BORDER_CHANGE_BY_YEAR[currentItem.year] ?? 'No explanation available yet.';
   
     useEffect(() => {
       setSelectedIndex(initialIndex);
@@ -217,6 +309,10 @@ export default function TimelineScreen({
 
 
   const selectedEra = useMemo(() => ERA_ITEMS[selectedIndex] ?? ERA_ITEMS[0], [selectedIndex]);
+
+  useEffect(() => {
+    onTimelineYearChange?.(selectedEra.year);
+  }, [selectedEra.year, onTimelineYearChange]);
   const selectedEraDefinition = ERA_BY_NAME[selectedEra.label] ?? {
     name: selectedEra.label,
     summary: selectedEra.label,
@@ -227,9 +323,20 @@ export default function TimelineScreen({
   const selectedEraMap = useMemo(() => getEraBackgroundMap(selectedEra.year), [selectedEra.year]);
 
   const targetEraKey = getEraKeyFromLabel(selectedEra.label);
+  
+  const visibleHotspots = useMemo(() => {
+    if (targetEraKey === 'all') return [];
 
-  const [poiOpen, setPoiOpen] = useState(false);
+    return Object.values(POI_DETAILS).filter((poi) =>
+      poi.eraKeys.includes(targetEraKey)
+    );
+  }, [targetEraKey]);
 
+  const [openPoiId, setOpenPoiId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    setOpenPoiId(null);
+  }, [selectedEra.year]);
 
   return (
     <View style={styles.screen}>
@@ -273,21 +380,48 @@ export default function TimelineScreen({
               <Text style={styles.eraSummary}>{selectedEraDefinition.summary}</Text>
             </View>
             <PoiButton
-              description='This is a sample description text for the point of interest. It can be multiple lines long and provides more details about the hotspot.'
+            description={borderDescription}
               />
           </View>
-            <MapHotspot
-            top={500}
-            left={600}
-            iconSource={CULTURE_ICON}
-            imageSource={HOTSPOT_IMAGE}
-            isOpen={poiOpen}
-            onHotspotPress={() => setPoiOpen(!poiOpen)}
-            style={{ zIndex: 10, elevation: 10 }}
-            />
-  
-        </View>
-  
+            {visibleHotspots.map((poi) => {
+              const position = HOTSPOT_POSITIONS[poi.id];
+
+              if (!position || !poi.mainImage) return null;
+
+              return (
+                <MapHotspot
+                  key={poi.id}
+                  top={position.top}
+                  left={position.left}
+                  iconSource={CULTURE_ICON}
+                  // iconSource={HOTSPOT_ICONS[poi.iconType]}
+                  imageSource={poi.mainImage}
+                  isOpen={openPoiId === poi.id}
+                  onHotspotPress={() =>
+                    setOpenPoiId((current) => (current === poi.id ? null : poi.id))
+                  }
+                  // onPopupPress={() => {
+                  //   console.log('Open detail page for', poi.id);
+                  // }} //change this to navigate to the detail screen for the POI
+                  onPopupPress={() => {
+                    router.push({
+                      pathname: '/poi-detail',
+                      params: {
+                        id: poi.id,
+                        returnRoot: 'timeline',
+                        returnYear: String(selectedEra.year),
+                      },
+                    });
+                  }}
+                  titleTop={poi.titleTop}
+                  yearLabel={poi.yearLabel}
+                  description={poi.summary ?? poi.description}
+                  style={{ zIndex: 10, elevation: 10 }}
+                />
+              );
+            })}
+
+          </View>
         <View style={styles.bottomControls}>
           <View style={styles.bottomToggleContainer}>
             <View style={styles.toggleWrapper}>
@@ -334,44 +468,44 @@ const styles = StyleSheet.create({
   },
 
   mapArea: {
-  flex: 1,
-  paddingHorizontal: 28,
-  paddingTop: 18,
-  overflow: 'hidden',
-  zIndex: 1,
-},
+    flex: 1,
+    paddingHorizontal: 28,
+    paddingTop: 18,
+    overflow: 'hidden',
+    zIndex: 1,
+  },
 
-backgroundImage: {
-  position: 'absolute',
-  top: 0,
-  right: 0,
-  bottom: 0,
-  left: '41%',
-  zIndex: 1,
-},
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: '41%',
+    zIndex: 1,
+  },
 
-leftLandWaterLayer: {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  bottom: 0,
-  width: '44%',
-  zIndex: 0,
-  overflow: 'hidden',
-},
+  leftLandWaterLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: '44%',
+    zIndex: 0,
+    overflow: 'hidden',
+  },
 
-leftLandFill: {
-  ...StyleSheet.absoluteFillObject,
-  backgroundColor: '#D3DCCD',
-},
+  leftLandFill: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#D3DCCD',
+  },
 
-leftVectorImage: {
-  position: 'absolute',
-  top: -170,
-  left: 0,
-  right: 0,
-  height: '80%',
-},
+  leftVectorImage: {
+    position: 'absolute',
+    top: -170,
+    left: 0,
+    right: 0,
+    height: '80%',
+  },
 
   homeButton: {
     width: 52,
@@ -430,12 +564,12 @@ leftVectorImage: {
     backgroundColor: '#D3DCCD',
   },
 
-bottomToggleContainer: {
-  position: 'absolute',
-  left: 20,
-  bottom: 92,
-  zIndex: 20,
-},
+  bottomToggleContainer: {
+    position: 'absolute',
+    left: 20,
+    bottom: 92,
+    zIndex: 20,
+  },
 
   toggleWrapper: {
     flexDirection: 'row',

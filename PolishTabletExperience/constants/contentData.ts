@@ -13,6 +13,18 @@ export type EraTab = {
     label: string;
 };
 
+/** Earliest timeline year used to open each era’s map (aligned with Content → Timeline). */
+export const EARLIEST_TIMELINE_YEAR_BY_ERA: Record<EraKey, number> = {
+    all: 1635,
+    golden_age: 1635,
+    wars_partitions: 1686,
+    independence: 1804,
+    rebirth: 1914,
+    ww2: 1939,
+    communist: 1948,
+    modern: 1991,
+};
+
 export type EraKeyNoAll = Exclude<EraKey, "all">;
 
 export type ContentCardItem = {
@@ -38,7 +50,12 @@ export type PoiDetail = {
     mainImage?: any;
     // IDs of other cards to show in "Related Content"
     relatedIds: string[];
+
+    //TODO add poi icon type
+    // iconType: PoiIconType;
 };
+
+// export type PoiIconType = 'culture' | 'biography' | 'history' | 'science';
 
 export const POI_DETAILS: Record<string, PoiDetail> = {
     c1: {
@@ -51,6 +68,7 @@ export const POI_DETAILS: Record<string, PoiDetail> = {
         summary: "Poland protected religious freedom early",
         mainImage: require("../assets/content_images/GoldenAge/GoldenAge_1.png"),
         relatedIds: ["c2", "c3"],
+        // iconType: 'culture',
     },
     c2: {
         id: "c2",

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import {
@@ -10,7 +11,8 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { MainColors, Typography } from '@/constants/theme';
-import { POI_DETAILS } from '../constants/contentData';
+import { useVisited } from '@/components/VisitedContext';
+import { POI_DETAILS, EARLIEST_TIMELINE_YEAR_BY_ERA } from '../constants/contentData';
 
 function BackIcon({ size = 28, color = '#1C1B1F' }) {
   return (
@@ -23,14 +25,93 @@ function BackIcon({ size = 28, color = '#1C1B1F' }) {
   );
 }
 
+function CloseIcon({ size = 28, color = '#1C1B1F' }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M6 6L18 18M18 6L6 18"
+        stroke={color}
+        strokeWidth={2.5}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
 const DEFAULT_MAIN_ID = 'c1';
+
+
+function paramFirst(value) {
+  if (value == null) return undefined;
+  if (Array.isArray(value)) return value[0];
+  if (typeof value === 'string') return value;
+  return String(value);
+}
+
+function buildReturnParams(params) {
+  const out = {};
+  const root = paramFirst(params.returnRoot);
+  const era = paramFirst(params.returnEra);
+  const year = paramFirst(params.returnYear);
+  if (root) out.returnRoot = root;
+  if (era) out.returnEra = era;
+  if (year != null && year !== '') out.returnYear = String(year);
+  return out;
+}
 
 export default function POIDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const currentId = typeof params.id === 'string' ? params.id : DEFAULT_MAIN_ID;
+  const currentId = paramFirst(params.id) || DEFAULT_MAIN_ID;
+  const returnParams = buildReturnParams(params);
 
   const mainPoi = POI_DETAILS[currentId] || POI_DETAILS[DEFAULT_MAIN_ID];
+  const { visitedIds, markVisited } = useVisited();
+
+  // Record "whether the user has visited this POI before entering this POI detail page"
+  // First time entering: visitedIds does not include this id, so it is false; leaving and coming back: it is true
+  const hasVisitedBeforeRef = React.useRef(visitedIds.includes(mainPoi.id));
+
+  // Mark current POI as visited when this screen mounts or id changes
+  React.useEffect(() => {
+    markVisited(mainPoi.id);
+  }, [mainPoi.id, markVisited]);
+
+  const handleBack = () => {
+    if (returnParams.returnRoot === 'content' && returnParams.returnEra) {
+      router.dismissTo({
+        pathname: '/',
+        params: {
+          openContentEra: returnParams.returnEra,
+        },
+      });
+      return;
+    }
+    if (returnParams.returnRoot === 'timeline' && returnParams.returnYear) {
+      router.dismissTo({
+        pathname: '/',
+        params: {
+          openTimelineAtYear: returnParams.returnYear,
+        },
+      });
+      return;
+    }
+    router.back();
+  };
+
+  /** Close (×): leave detail and open the timeline map for this POI’s primary era. */
+  const handleClose = () => {
+    const primaryEra = mainPoi.eraKeys?.[0];
+    const year = primaryEra
+      ? EARLIEST_TIMELINE_YEAR_BY_ERA[primaryEra]
+      : EARLIEST_TIMELINE_YEAR_BY_ERA.all;
+    router.replace({
+      pathname: '/',
+      params: {
+        openTimelineAtYear: String(year),
+      },
+    });
+  };
 
   const relatedPois =
     (mainPoi.relatedIds || [])
@@ -56,11 +137,20 @@ export default function POIDetailScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={handleBack}
           style={styles.backButton}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
           <BackIcon />
+        </TouchableOpacity>
+        <View style={styles.headerSpacer} />
+        <TouchableOpacity
+          onPress={handleClose}
+          style={styles.closeButton}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityLabel="Close"
+        >
+          <CloseIcon />
         </TouchableOpacity>
       </View>
 
@@ -70,6 +160,7 @@ export default function POIDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.mainContent, contentFlex]}>
+          {/* Embedded video: use key={mediaResetKey} from useVisited() so GuideScreen reset restarts playback. */}
           <View style={styles.imagePlaceholder}>
             {mainPoi.mainImage ? (
               <Image source={mainPoi.mainImage} style={styles.mainImage} contentFit="cover" />
@@ -77,14 +168,23 @@ export default function POIDetailScreen() {
           </View>
           <View style={styles.titleRow}>
             <Text style={styles.poiTitle}>{mainPoi.titleTop}</Text>
-            <Text style={styles.poiValue}>{mainPoi.yearLabel}</Text>
+            <View style={styles.rightTitleArea}>
+              {hasVisitedBeforeRef.current && (
+                <View style={styles.visitedBadge}>
+                  <Text style={styles.visitedBadgeText}>Visited</Text>
+                </View>
+              )}
+              <Text style={styles.poiValue}>{mainPoi.yearLabel}</Text>
+            </View>
           </View>
           <Text style={styles.description}>{mainPoi.description}</Text>
         </View>
 
         <View style={[styles.relatedSection, relatedFlex]}>
           <Text style={styles.relatedTitle}>Related Content</Text>
-          {relatedPois.map((item) => (
+          {relatedPois.map((item) => {
+            const isVisited = visitedIds.includes(item.id);
+            return (
             <TouchableOpacity
               key={item.id}
               style={styles.relatedCard}
@@ -92,7 +192,7 @@ export default function POIDetailScreen() {
               onPress={() =>
                 router.push({
                   pathname: '/poi-detail',
-                  params: { id: item.id },
+                  params: { id: item.id, ...returnParams },
                 })
               }
             >
@@ -106,14 +206,21 @@ export default function POIDetailScreen() {
                   <Text style={styles.relatedCardTitle} numberOfLines={1}>
                     {item.title}
                   </Text>
-                  <Text style={styles.relatedCardValue}>{item.value}</Text>
+                  <View style={styles.relatedRightArea}>
+                    {isVisited && (
+                      <View style={styles.visitedBadgeSmall}>
+                        <Text style={styles.visitedBadgeSmallText}>Visited</Text>
+                      </View>
+                    )}
+                    <Text style={styles.relatedCardValue}>{item.value}</Text>
+                  </View>
                 </View>
                 <Text style={styles.relatedCardDesc} numberOfLines={2}>
                   {item.description}
                 </Text>
               </View>
             </TouchableOpacity>
-          ))}
+          )})}
         </View>
       </ScrollView>
     </View>
@@ -132,7 +239,13 @@ const styles = StyleSheet.create({
     paddingTop: 56,
     paddingBottom: 12,
   },
+  headerSpacer: {
+    flex: 1,
+  },
   backButton: {
+    padding: 4,
+  },
+  closeButton: {
     padding: 4,
   },
   scroll: {
@@ -170,6 +283,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     gap: 12,
   },
+  rightTitleArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   poiTitle: {
     ...Typography.h4,
     color: MainColors.primaryBlack,
@@ -178,6 +296,16 @@ const styles = StyleSheet.create({
   poiValue: {
     ...Typography.h4,
     color: MainColors.primaryBlack,
+  },
+  visitedBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: MainColors.pointRed,
+  },
+  visitedBadgeText: {
+    ...Typography.small,
+    color: '#FFFFFF',
   },
   description: {
     ...Typography.body,
@@ -226,6 +354,11 @@ const styles = StyleSheet.create({
     color: MainColors.primaryBlack,
     flex: 1,
   },
+  relatedRightArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   relatedCardValue: {
     ...Typography.small,
     color: MainColors.primaryBlack,
@@ -233,5 +366,15 @@ const styles = StyleSheet.create({
   relatedCardDesc: {
     ...Typography.small,
     color: MainColors.textGrey,
+  },
+  visitedBadgeSmall: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+    backgroundColor: MainColors.pointRed,
+  },
+  visitedBadgeSmallText: {
+    ...Typography.small,
+    color: '#FFFFFF',
   },
 });
