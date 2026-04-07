@@ -134,6 +134,7 @@ export default function IndexScreen() {
 
   const timelineOpacity = useRef(new Animated.Value(1)).current;
   const contentOpacity = useRef(new Animated.Value(0)).current;
+  const currentTimelineYearRef = useRef<number | undefined>(1918);
 
   const isEraKey = (value: string): value is EraKey => ERA_KEYS.includes(value as EraKey);
 
@@ -180,7 +181,7 @@ export default function IndexScreen() {
         <TimelineScreen
           initialYear={timelineYear}
           activeGuide={params.guide as string}
-          onTimelineYearChange={setTimelineYear}
+          onTimelineYearChange={(y) => { currentTimelineYearRef.current = y; }}
           onPressContent={(era) => switchView('content', era)}
         />
       </Animated.View>
