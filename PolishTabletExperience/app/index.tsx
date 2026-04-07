@@ -130,11 +130,11 @@ export default function IndexScreen() {
 
   const [view, setView] = useState<HomeView>('timeline');
   const [contentEra, setContentEra] = useState<EraKey>('all');
-  const [timelineYear, setTimelineYear] = useState<number | undefined>(1918);
+  const [timelineYear, setTimelineYear] = useState<number | undefined>(1635);
 
   const timelineOpacity = useRef(new Animated.Value(1)).current;
   const contentOpacity = useRef(new Animated.Value(0)).current;
-  const currentTimelineYearRef = useRef<number | undefined>(1918);
+  const currentTimelineYearRef = useRef<number | undefined>(1635);
 
   const isEraKey = (value: string): value is EraKey => ERA_KEYS.includes(value as EraKey);
 
