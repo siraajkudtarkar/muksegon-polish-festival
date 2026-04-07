@@ -481,7 +481,12 @@ export default function TimelineScreen({
                 guideStyle={guideStyle}
                 isRelevant={isCurrentYearRelevant}
                 onExitGuide={() => {
-                  router.replace('/');
+                  router.replace({
+                    pathname: '/',
+                    params: {
+                      openTimelineAtYear: String(selectedEra.year),
+                    },
+                  });
                 }}
               />
             ) : (
