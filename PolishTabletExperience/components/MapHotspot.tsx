@@ -9,9 +9,8 @@ import {
 } from 'react-native';
 
 type Props = {
-
-  top: number | string;
-  left: number | string;
+  top: number | `${number}%`;
+  left: number | `${number}%`;
   iconSource: any;
   imageSource: any;
   isOpen: boolean;
@@ -21,7 +20,6 @@ type Props = {
   titleTop: string;
   yearLabel: string;
   description: string;
-  
 };
 
 export default function MapHotspot({
@@ -37,10 +35,32 @@ export default function MapHotspot({
   yearLabel,
   description,
 }: Props) {
+  const numericTop = typeof top === 'number' ? top : parseFloat(String(top));
+  const openDownward = !Number.isNaN(numericTop) && numericTop < 250;
+
   return (
-    <View style={[styles.container, { top, left }, style]}>
+    <View
+      style={[
+        styles.container,
+        { top, left },
+        style,
+        isOpen && styles.openContainer,
+      ]}
+    >
+      <Pressable style={styles.hotspotButton} onPress={onHotspotPress}>
+        <Image source={iconSource} style={styles.hotspotIcon} contentFit="contain" />
+      </Pressable>
+
       {isOpen && (
-        <Pressable style={styles.popupWrapper} onPress={onPopupPress}>
+        <Pressable
+          style={[
+            styles.popupWrapper,
+            openDownward ? styles.popupWrapperDown : styles.popupWrapperUp,
+          ]}
+          onPress={onPopupPress}
+        >
+          {openDownward && <View style={styles.triangleDown} />}
+
           <View style={styles.popup}>
             <Image source={imageSource} style={styles.popupImage} contentFit="cover" />
 
@@ -54,13 +74,9 @@ export default function MapHotspot({
             </View>
           </View>
 
-          <View style={styles.triangle} />
+          {!openDownward && <View style={styles.triangleUp} />}
         </Pressable>
       )}
-
-      <Pressable style={styles.hotspotButton} onPress={onHotspotPress}>
-        <Image source={iconSource} style={styles.hotspotIcon} contentFit="contain" />
-      </Pressable>
     </View>
   );
 }
@@ -72,12 +88,21 @@ const styles = StyleSheet.create({
     zIndex: 10,
     elevation: 10,
   },
+  openContainer: {
+    zIndex: 9999,
+    elevation: 9999,
+  },
   popupWrapper: {
     position: 'absolute',
-    bottom: 44,
     alignItems: 'center',
-    zIndex: 11,
-    elevation: 11,
+    zIndex: 20,
+    elevation: 20,
+  },
+  popupWrapperUp: {
+    bottom: 44,
+  },
+  popupWrapperDown: {
+    top: 44,
   },
   popup: {
     width: 296,
@@ -114,12 +139,19 @@ const styles = StyleSheet.create({
     lineHeight: 27,
     color: '#2E2A2A',
   },
-  triangle: {
+  triangleUp: {
     width: 12,
     height: 12,
     backgroundColor: '#FFFFFF',
     transform: [{ rotate: '45deg' }],
     marginTop: -6,
+  },
+  triangleDown: {
+    width: 12,
+    height: 12,
+    backgroundColor: '#FFFFFF',
+    transform: [{ rotate: '45deg' }],
+    marginBottom: -6,
   },
   hotspotButton: {
     width: 44,
