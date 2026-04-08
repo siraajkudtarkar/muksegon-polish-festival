@@ -10,7 +10,6 @@ import {
   ERA_TABS,
   MOCK_CARDS,
   EraKey,
-  EARLIEST_TIMELINE_YEAR_BY_ERA,
 } from "../constants/contentData";
 
 import { ThemedText } from "@/components/themed-text";
@@ -22,14 +21,17 @@ type ColumnItem = {
 };
 
 type ContentScreenProps = {
-  onPressTimeline?: (year: number) => void;
+  onPressTimeline?: (era: EraKey) => void;
   initialEra?: EraKey;
 };
 
-export default function ContentScreen({ onPressTimeline,
-  initialEra = "all", }: ContentScreenProps) {
+export default function ContentScreen({
+  onPressTimeline,
+  initialEra = "all",
+}: ContentScreenProps) {
   const router = useRouter();
   const [selectedEra, setSelectedEra] = useState<EraKey>(initialEra);
+
   useEffect(() => {
     setSelectedEra(initialEra);
   }, [initialEra]);
@@ -42,7 +44,8 @@ export default function ContentScreen({ onPressTimeline,
   const activeEraColor =
     selectedEra === "all"
       ? MainColors.buttonBlack
-      : EraTabTheme[selectedEra as keyof typeof EraTabTheme]?.color ?? MainColors.pointRed;
+      : EraTabTheme[selectedEra as keyof typeof EraTabTheme]?.color ??
+        MainColors.pointRed;
 
   const filteredCards = useMemo(() => {
     if (selectedEra === "all") return MOCK_CARDS;
@@ -57,18 +60,14 @@ export default function ContentScreen({ onPressTimeline,
     return result;
   }, [filteredCards]);
 
-  const targetYear = EARLIEST_TIMELINE_YEAR_BY_ERA[selectedEra] ?? 1635;
-
   return (
     <View style={styles.container}>
-      {/* Era Tabs */}
       <EraTabBar
         selectedKey={selectedEra}
         onSelect={setSelectedEra}
         activeColor={activeEraColor}
       />
 
-      {/* Page Title */}
       <ThemedText
         type="h4"
         style={[styles.pageTitle, { color: MainColors.primaryBlack }]}
@@ -76,7 +75,6 @@ export default function ContentScreen({ onPressTimeline,
         {currentTitle}
       </ThemedText>
 
-      {/* Two-row horizontal list */}
       <FlatList
         data={columns}
         keyExtractor={(_, idx) => `col-${idx}`}
@@ -101,20 +99,21 @@ export default function ContentScreen({ onPressTimeline,
                 }
               />
             )}
+
             {item.bottom && (
               <View style={styles.cardGap}>
                 <ContentCard
                   item={item.bottom}
                   onPress={() =>
                     item.bottom?.id &&
-                  router.push({
-                    pathname: "/poi-detail",
-                    params: {
-                      id: String(item.bottom.id),
-                      returnRoot: "content",
-                      returnEra: selectedEra,
-                    },
-                  })
+                    router.push({
+                      pathname: "/poi-detail",
+                      params: {
+                        id: String(item.bottom.id),
+                        returnRoot: "content",
+                        returnEra: selectedEra,
+                      },
+                    })
                   }
                 />
               </View>
@@ -123,13 +122,12 @@ export default function ContentScreen({ onPressTimeline,
         )}
       />
 
-      {/* Bottom Toggle */}
       <View style={styles.bottomToggleContainer}>
         <View style={styles.toggleWrapper}>
           <TouchableOpacity
             style={styles.inactiveToggle}
-             onPress={() =>
-              onPressTimeline ? onPressTimeline(targetYear) : router.push("/")
+            onPress={() =>
+              onPressTimeline ? onPressTimeline(selectedEra) : router.push("/")
             }
             activeOpacity={0.85}
           >
