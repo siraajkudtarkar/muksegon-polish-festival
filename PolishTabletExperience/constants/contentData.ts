@@ -7,7 +7,9 @@ export type EraKey =
     | "independence"
     | "rebirth"
     | "ww2"
+    | "liberation"
     | "communist"
+    | "growingDiscontent"
     | "modern";
 
 export type EraTab = {
@@ -23,8 +25,10 @@ export const EARLIEST_TIMELINE_YEAR_BY_ERA: Record<EraKey, number> = {
     independence: 1804,
     rebirth: 1914,
     ww2: 1939,
+    liberation: 1945,
     communist: 1948,
-    modern: 1991,
+    growingDiscontent: 1980,
+    modern: 1989,
 };
 
 export type EraKeyNoAll = Exclude<EraKey, "all">;
@@ -238,7 +242,7 @@ export const POI_DETAILS: Record<string, PoiDetail> = {
         yearLabel: "1939-1945",
         titleTop: "Did You Know?",
         description: "Members of one Muskegon family were shipped on cattle cars from their homes in Poland to concentration camps in Siberia in World War II. Two died and four returned home.",
-        summary: "Muskegon Family’s WWII Tragedy",
+        summary: "Muskegon Family's WWII Tragedy",
         mainImage: require("../assets/content_images/WW_II/WW_II_6.png"),
         relatedIds: ["c7", "c12","c2"],
     },
@@ -294,7 +298,7 @@ export const POI_DETAILS: Record<string, PoiDetail> = {
     },
     c24: {
         id: "c24",
-        eraKeys: ["ww2"],
+        eraKeys: ["liberation"],
         yearLabel: "1945",
         titleTop: "Liberation",
         description: "Polish-Jewish prisoners celebrate liberation after years of Nazi captivity. Many survivors faced immense hardship even after freedom. Liberation revealed the full horror of the Holocaust to the world.",
@@ -394,7 +398,7 @@ export const POI_DETAILS: Record<string, PoiDetail> = {
     },
     c34: {
         id: "c34",
-        eraKeys: ["communist", "modern"],
+        eraKeys: ["liberation", "communist", "modern"],
         yearLabel: "1945",
         titleTop: "Did You Know?",
         description: "Despite helping defeat Hitler, Poland was handed over to the Soviets in 1945 and a communist puppet government was installed which cruelly repressed the people.",
@@ -418,7 +422,7 @@ export const POI_DETAILS: Record<string, PoiDetail> = {
         yearLabel: "1989",
         titleTop: "Did You Know?",
         description: "Despite severe repression, Solidarity persisted and in 1989 the communist regime agreed to the first free elections, which Solidarity won in a landslide.",
-        summary: "Solidarity won Poland’s free elections",
+        summary: "Solidarity won Poland's free elections",
         mainImage: require("../assets/content_images/ModernPoland/ModernPoland_2.png"),
         relatedIds: ["c34", "c35","c37"],
     },
@@ -428,7 +432,7 @@ export const POI_DETAILS: Record<string, PoiDetail> = {
         yearLabel: "",
         titleTop: "Did You Know?",
         description: "The collapse of communism in Poland led to the fall of communist regimes across eastern & central Europe and the end of the Cold War.",
-        summary: "Poland’s shift ended Cold War",
+        summary: "Poland's shift ended Cold War",
         mainImage: require("../assets/content_images/ModernPoland/ModernPoland_3.png"),
         relatedIds: ["c34", "c35","c36"],
     },
@@ -452,7 +456,9 @@ export const ERA_TABS: EraTab[] = [
     { key: "independence", label: EraTabTheme.independence.label },
     { key: "rebirth", label: EraTabTheme.rebirth.label },
     { key: "ww2", label: EraTabTheme.ww2.label },
+    { key: "liberation", label: EraTabTheme.liberation.label },
     { key: "communist", label: EraTabTheme.communist.label },
+    { key: "growingDiscontent", label: EraTabTheme.growingDiscontent.label },
     { key: "modern", label: EraTabTheme.modern.label },
 ];
 
@@ -644,7 +650,7 @@ export const MOCK_CARDS: ContentCardItem[] = [
     },
     {
         id: "c24",
-        eraKeys: ["ww2"],
+        eraKeys: ["liberation"],
         yearLabel: "1945",
         titleTop: "Liberation",
         titleBottom: "Liberated Polish Jews endured hardship, revealed Holocaust",

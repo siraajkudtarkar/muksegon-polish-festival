@@ -57,9 +57,17 @@ export const EraTabTheme = {
     label: 'World War II & Occupation',
     color: EraColors.ww2,
   },
+  liberation: {
+    label: 'Liberation & Reorganization',
+    color: EraColors.liberation,
+  },
   communist: {
     label: 'Communist Poland',
     color: EraColors.communist,
+  },
+  growingDiscontent: {
+    label: 'Growing Discontent',
+    color: EraColors.growingDiscontent,
   },
   modern: {
     label: 'Modern Poland',

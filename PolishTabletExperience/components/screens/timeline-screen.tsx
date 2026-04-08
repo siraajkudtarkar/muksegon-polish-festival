@@ -103,7 +103,7 @@ const ERA_DEFINITIONS: EraDefinition[] = [
     color: EraColors.ww2,
   },
   {
-    eraKey: 'communist',
+    eraKey: 'liberation',
     name: 'Liberation & Reorganization',
     summary: 'N/A',
     timeframe: '1945 — 1948',
@@ -119,7 +119,7 @@ const ERA_DEFINITIONS: EraDefinition[] = [
     color: EraColors.communist,
   },
     {
-    eraKey: 'communist',
+    eraKey: 'growingDiscontent',
     name: 'Growing Discontent',
     summary: 'N/A',
     timeframe: '1980 — 1989',

@@ -11,7 +11,7 @@ const FADE_DURATION = 200;
 
 const ERA_KEYS: EraKey[] = [
   'all', 'golden_age', 'wars_partitions', 'independence',
-  'rebirth', 'ww2', 'communist', 'modern',
+  'rebirth', 'ww2', 'liberation', 'communist', 'growingDiscontent', 'modern',
 ];
 
 function paramFirst(value: string | string[] | undefined): string | undefined {
@@ -47,10 +47,12 @@ export default function IndexScreen() {
           ? [contentOpacity, timelineOpacity]
           : [timelineOpacity, contentOpacity];
 
-      Animated.parallel([
-        Animated.timing(fadeOut, { toValue: 0, duration: FADE_DURATION, useNativeDriver: true }),
-        Animated.timing(fadeIn, { toValue: 1, duration: FADE_DURATION, useNativeDriver: true }),
-      ]).start(() => setView(newView));
+          setView(newView);
+
+          Animated.parallel([
+            Animated.timing(fadeOut, { toValue: 0, duration: FADE_DURATION, useNativeDriver: true }),
+            Animated.timing(fadeIn, { toValue: 1, duration: FADE_DURATION, useNativeDriver: true }),
+          ]).start();
     },
     [timelineOpacity, contentOpacity],
   );

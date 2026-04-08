@@ -3,6 +3,7 @@ import { MainColors, QuizResultColors, Typography } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from 'expo-router';
 
+
 export default function GuideScreen() {
     return (
         <View style={styles.container}>
