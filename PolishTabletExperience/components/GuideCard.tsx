@@ -19,6 +19,7 @@ type GuideCardProps = {
   } | null;
   isRelevant?: boolean;
   legendItems: LegendItem[];
+  onExitGuide?: () => void;
 };
 
 export default function GuideCard({
