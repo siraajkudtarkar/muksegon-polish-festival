@@ -11,6 +11,8 @@ import { EraKey, POI_DETAILS } from '@/constants/contentData';
 import { HOTSPOT_POSITIONS } from '@/constants/hotspotPositions';
 import GuideCard from '../GuideCard';
 import LegendCard from '../LegendCard';
+import GuideLegendModal from '../GuideLegendModal';
+import GuideIntroModal from '../GuideIntroModal';
 
 const HOME_ICON = require('@/assets/General_Icons/ Home_icon.svg');
 
@@ -197,6 +199,33 @@ const HOTSPOT_ICONS = {
   science: require('@/assets/POI_Icon/POI_Science.svg'),
 };
 
+const LEGEND_ITEMS = [
+  {
+    key: 'culture',
+    label: 'Culture',
+    description: 'Highlights cultural traditions, art, and identity.',
+    iconSource: HOTSPOT_ICONS.culture,
+  },
+  {
+    key: 'biography',
+    label: 'Biography',
+    description: 'Introduces important people connected to this era.',
+    iconSource: HOTSPOT_ICONS.biography,
+  },
+  {
+    key: 'history',
+    label: 'History',
+    description: 'Explains major historical moments and turning points.',
+    iconSource: HOTSPOT_ICONS.history,
+  },
+  {
+    key: 'science',
+    label: 'Science',
+    description: 'Shows discoveries, inventions, and scientific impact.',
+    iconSource: HOTSPOT_ICONS.science,
+  },
+];
+
 const MAP_BY_FLOOR_YEAR: Array<{ startYear: number; source: number }> = [
   { startYear: 1635, source: MAP_1635 },
   { startYear: 1686, source: MAP_1699 },
@@ -363,6 +392,10 @@ export default function TimelineScreen({
   const { resetExperience } = useVisited();
   const [endJourneyModalVisible, setEndJourneyModalVisible] = useState(false);
 
+  const [guideModalVisible, setGuideModalVisible] = useState(false);
+  const [hasShownGuideIntro, setHasShownGuideIntro] = useState(false);
+  const [showGuideIntro, setShowGuideIntro] = useState(false);
+
   const confirmEndJourney = useCallback(() => {
     resetExperience();
     setEndJourneyModalVisible(false);
@@ -393,6 +426,16 @@ export default function TimelineScreen({
     useEffect(() => {
       setSelectedIndex(initialIndex);
     }, [initialIndex]);
+
+
+    useEffect(() => {
+      if (activeGuide && guideStyle && !hasShownGuideIntro) {
+        setShowGuideIntro(true);
+        setHasShownGuideIntro(true);
+      }
+    }, [activeGuide, guideStyle, hasShownGuideIntro]);
+
+
     const selectedItem = timelineItems[selectedIndex];
     const isCurrentYearRelevant = selectedItem?.isRelevant !== false;
 
@@ -433,6 +476,31 @@ export default function TimelineScreen({
         visible={endJourneyModalVisible}
         onContinue={confirmEndJourney}
         onRequestClose={() => setEndJourneyModalVisible(false)}
+      />
+
+      {guideStyle ? (
+        <GuideIntroModal
+          visible={showGuideIntro}
+          guideLabel={guideStyle.label}
+          guideColor={guideStyle.color}
+          guideDescription={guideStyle.description}
+          legendItems={LEGEND_ITEMS}
+          onStartExploring={() => setShowGuideIntro(false)}
+        />
+      ) : null}
+
+      <GuideLegendModal
+        visible={guideModalVisible}
+        title={guideStyle ? guideStyle.label : 'Legend'}
+        subtitle={guideStyle ? 'Your journey begins' : 'Map legend'}
+        accentColor={guideStyle?.color ?? '#2F3437'}
+        description={
+          guideStyle?.description ??
+          'Explore the map and use these icons to discover stories throughout each era.'
+        }
+        legendItems={LEGEND_ITEMS}
+        buttonLabel={guideStyle ? 'Start Exploring' : 'Close'}
+        onClose={() => setGuideModalVisible(false)}
       />
 
       <SafeAreaView style={styles.container}>
@@ -480,6 +548,7 @@ export default function TimelineScreen({
               <GuideCard
                 guideStyle={guideStyle}
                 isRelevant={isCurrentYearRelevant}
+                legendItems={LEGEND_ITEMS}
                 onExitGuide={() => {
                   router.replace({
                     pathname: '/',
@@ -490,7 +559,7 @@ export default function TimelineScreen({
                 }}
               />
             ) : (
-              <LegendCard />
+              <LegendCard legendItems={LEGEND_ITEMS} />
             )}
                 
           <View style={{ flexDirection: 'column', gap: 20 }}>
@@ -523,7 +592,7 @@ export default function TimelineScreen({
                   key={poi.id}
                   top={position.top}
                   left={position.left}
-                  iconSource={CULTURE_ICON}
+                  iconSource={HOTSPOT_ICONS[poi.iconType] ?? CULTURE_ICON}                  
                   // iconSource={HOTSPOT_ICONS[poi.iconType]}
                   imageSource={poi.mainImage}
                   isOpen={openPoiId === poi.id}

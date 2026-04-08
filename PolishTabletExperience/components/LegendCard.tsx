@@ -1,31 +1,30 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 
-type GuideCardProps = {
-  guideStyle?: {
-    label: string;
-    color: string;
-    chipBorder?: string;
-    description?: string;
-    focusesOn?: string[];
-  } | null;
-  isRelevant?: boolean;
-  onExitGuide?: () => void;
+type LegendItem = {
+  key: string;
+  label: string;
+  description: string;
+  iconSource: number;
 };
 
-export default function LegendCard({
-  isRelevant = false,
-  onExitGuide,
-}: GuideCardProps) {
+type LegendCardProps = {
+  legendItems: LegendItem[];
+};
+
+export default function LegendCard({ legendItems }: LegendCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
     <View style={styles.wrapper}>
       <Pressable
+        onPress={() => setExpanded((prev) => !prev)}
         style={[
           styles.card,
           {
-            borderColor:'rgba(255,255,255,0.2)',
+            width: expanded ? 280 : 140,
+            borderColor: 'rgba(255,255,255,0.2)',
             borderWidth: 1.5,
             backgroundColor: 'rgba(255,255,255,0.92)',
           },
@@ -33,19 +32,32 @@ export default function LegendCard({
       >
         <View style={styles.headerRow}>
           <View style={styles.headerTextWrap}>
-          <Text
-              style={[
-                styles.title,
-                { color: '#2F3437' },
-              ]}
-            >
-              Legend
-            </Text>
+            <Text style={styles.title}>Legend</Text>
             <Text style={styles.subtitle}>
-              Tap to see more
+              {expanded ? 'Tap to close' : 'Tap to see more'}
             </Text>
           </View>
         </View>
+
+        {expanded ? (
+          <View style={styles.expandedContent}>
+            <Text style={styles.sectionLabel}>Map icons</Text>
+
+            {legendItems.map((item) => (
+              <View key={item.key} style={styles.legendRow}>
+                <Image
+                  source={item.iconSource}
+                  style={styles.legendIcon}
+                  contentFit="contain"
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.legendLabel}>{item.label}</Text>
+                  <Text style={styles.legendDescription}>{item.description}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : null}
       </Pressable>
     </View>
   );
@@ -59,7 +71,6 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   card: {
-    width: 140,
     borderRadius: 20,
     borderWidth: 1.5,
     padding: 16,
@@ -71,13 +82,6 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    transform: [{ rotate: '45deg' }],
-    borderRadius: 2,
-    marginRight: 12,
   },
   headerTextWrap: {
     flex: 1,
@@ -98,63 +102,32 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.08)',
   },
-  description: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: '#42484a',
-  },
-  section: {
-    marginTop: 14,
-  },
   sectionLabel: {
     fontSize: 14,
     fontWeight: '700',
     color: '#2F3437',
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  bulletText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#515558',
-    marginBottom: 2,
-  },
-  actionRow: {
+  legendRow: {
     flexDirection: 'row',
-    marginTop: 18,
+    alignItems: 'flex-start',
     gap: 10,
+    marginBottom: 10,
   },
-  secondaryButton: {
-    flex: 1,
-    height: 40,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
+  legendIcon: {
+    width: 22,
+    height: 22,
+    marginTop: 2,
   },
-  secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#42484a',
-  },
-  primaryButton: {
-    flex: 1,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryButtonText: {
-    fontSize: 14,
+  legendLabel: {
+    fontSize: 13,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#2F3437',
   },
-  relevantLabel: {
-    marginBottom: 2,
-    top: -4,
-    fontSize: 10,
-    fontWeight: '600',
-    opacity: 0.9,
+  legendDescription: {
+    marginTop: 2,
+    fontSize: 12,
+    lineHeight: 17,
+    color: '#515558',
   },
 });
